@@ -207,6 +207,7 @@ var astFromFileContent = function (data, err) {
 
 		var ast = babelParser.parse(data.data, {
 			minify: false,
+			sourceType: "module",
 			plugins: ["decorators"]
 		});
 		data.ast = ast;
