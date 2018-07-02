@@ -186,28 +186,7 @@ public final class RuntimeHelper {
 
                     // if app is in debuggable mode run livesync service
                     // runtime needs to be initialized before the NativeScriptSyncService is enabled because it uses runtime.runScript(...)
-                    try {
-                        @SuppressWarnings("unchecked")
-                        Class NativeScriptSyncService = Class.forName("com.tns.NativeScriptSyncServiceSocketIml");
-
-                        @SuppressWarnings("unchecked")
-                        Constructor cons = NativeScriptSyncService.getConstructor(new Class[] {Runtime.class, Logger.class, Context.class});
-                        Object syncService = cons.newInstance(runtime, logger, app);
-
-                        @SuppressWarnings("unchecked")
-                        Method startServerMethod = NativeScriptSyncService.getMethod("startServer");
-                        startServerMethod.invoke(syncService);
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (NoSuchMethodException e) {
-                        e.printStackTrace();
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
-                        e.printStackTrace();
-                    } catch (InstantiationException e) {
-                        e.printStackTrace();
-                    }
+                    initLiveSync(runtime, logger, app);
                 }
 
                 runtime.runScript(new File(appDir, "internal/ts_helpers.js"));
@@ -233,6 +212,39 @@ public final class RuntimeHelper {
             return runtime;
         } finally {
             frame.close();
+        }
+    }
+
+    public static void initLiveSync(Runtime runtime, Logger logger, Application app){
+        boolean isDebuggable = Util.isDebuggableApp(app);
+
+        if(!isDebuggable){
+            return;
+        }
+
+        // if app is in debuggable mode run livesync service
+        // runtime needs to be initialized before the NativeScriptSyncService is enabled because it uses runtime.runScript(...)
+        try {
+            @SuppressWarnings("unchecked")
+            Class NativeScriptSyncService = Class.forName("com.tns.NativeScriptSyncServiceSocketIml");
+
+            @SuppressWarnings("unchecked")
+            Constructor cons = NativeScriptSyncService.getConstructor(new Class[] {Runtime.class, Logger.class, Context.class});
+            Object syncService = cons.newInstance(runtime, logger, app);
+
+            @SuppressWarnings("unchecked")
+            Method startServerMethod = NativeScriptSyncService.getMethod("startServer");
+            startServerMethod.invoke(syncService);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
         }
     }
 
